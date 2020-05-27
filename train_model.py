@@ -5,7 +5,7 @@ import random
 random.seed(SEED)
 import math
 import h5py
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
+from keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
 from keras.models import Model
 from keras.layers import Dense, BatchNormalization, Activation, Dropout, GlobalAveragePooling2D, Concatenate
 from keras.layers import InputLayer, Input
@@ -18,7 +18,7 @@ WEIGHTS_PATH = "weights/weights.hdf5" # Change weight path here
 
 def create_base_model(prefix = None, image_size = 224):
     base_model = MobileNetV2(
-        input_shape = (image_size, image_size, 3), alpha = 1.0, depth_multiplier = 1,
+        input_shape = (image_size, image_size, 3), alpha = 1.0,
         include_top = False, weights = "imagenet"
     )
 
