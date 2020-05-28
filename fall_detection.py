@@ -22,16 +22,18 @@ GAUSSIAN_KERNEL = (3, 3)
 def start_fall_detector_realtime(input_path = 0):
     ''' Capture RGB and MHI in real time and feed into model '''
     model = create_model(WEIGHTS_PATH)
-    cap = cv.VideoCapture(input_path)
-    if not cap.isOpened():
+    cap = WebcamVideoStream(src=0).start()
+    fps = FPS().start()
+    #cap = cv.VideoCapture(input_path)
+    if not cap.stream.isOpened():
         print("Cannot open video/webcam {}".format(input_path))
         return
 
     MHI_DURATION_SHORT = 300 # Uses for putting bounding box on recent motion
 
-    fps = int(cap.get(cv.CAP_PROP_FPS))
-    cap_width = cap.get(cv.CAP_PROP_FRAME_WIDTH)
-    cap_height = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
+    fps = int(cap.stream.get(cv.CAP_PROP_FPS))
+    cap_width = cap.stream.get(cv.CAP_PROP_FRAME_WIDTH)
+    cap_height = cap.stream.get(cv.CAP_PROP_FRAME_HEIGHT)
     interval = int(max(1, math.ceil(fps/10) if (fps/10 - math.floor(fps/10)) >= 0.5 else math.floor(fps/10)))
     ms_per_frame = 1000 / fps # milliseconds
     count = interval
@@ -41,14 +43,14 @@ def start_fall_detector_realtime(input_path = 0):
     prev_timestamp = [i * ms_per_frame for i in range(interval)]
     prev_frames = [None] * interval
     for i in range(interval):
-        ret, frame = cap.read()
+        frame = cap.read()
         frame = cv.resize(frame, (IMAGE_SIZE, IMAGE_SIZE), interpolation = cv.INTER_AREA)
         frame = cv.GaussianBlur(frame, GAUSSIAN_KERNEL, 0)
         prev_frames[i] = frame.copy()
 
     fall_frames_seen = 0 # Number of consecutive fall frames seen so far
     fall_detected = False
-    MIN_NUM_FALL_FRAME = int(fps/5) # Need at least some number of frames to avoid flickery classifications
+    MIN_NUM_FALL_FRAME = int(fps/2) # Need at least some number of frames to avoid flickery classifications
 
     cv.namedWindow("Capture")
     cv.namedWindow("Cropped")
@@ -59,9 +61,8 @@ def start_fall_detector_realtime(input_path = 0):
 
     while True:
         start_time = timer()
-        ret, orig_frame = cap.read()
-        if not ret:
-            break
+        orig_frame = cap.read()
+   
 
         # Create MHI
         prev_ind = count % interval
@@ -126,6 +127,7 @@ def start_fall_detector_realtime(input_path = 0):
         preprocess_input(temporal_input)
 
         # Make prediction
+        #tweak prediction here
         prediction = np.round(model.predict([spatial_input, temporal_input]))[0]
         is_fall = prediction == 1
         if is_fall:
