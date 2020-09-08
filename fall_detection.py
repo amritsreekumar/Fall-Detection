@@ -159,10 +159,4 @@ def start_fall_detector_realtime(input_path = 0):
     cv.destroyAllWindows()
 
 if __name__ == "__main__":
-    # start_fall_detector_FDD(
-    #     "datasets/FDD/Coffee_room_01/Videos/video (5).avi",
-    #     "datasets/FDD/Coffee_room_01/Annotation_files/video (5).txt"
-    # )
     start_fall_detector_realtime()
-    # start_fall_detector_realtime("datasets/URFD/Fall_videos/fall-15-cam0-rgb.avi")
-    # start_fall_detector_realtime("demo/test3.avi")
